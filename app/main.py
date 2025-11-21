@@ -1,49 +1,46 @@
+import os
 from agents.data_agent import DataAgent
 from agents.ml_agent import MLAgent
 from agents.visual_agent import VisualAgent
-import pandas as pd
+
+DATA_PATH = "data/cleaned_sales_data.csv"
 
 def main():
 
-    print("\n=== Marketing Portfolio Multi-Agent System Started ===\n")
-
-    # --- AGENT 1: DATA AGENT ---
+    print("\n===== STEP 1: DATA AGENT =====")
     data_agent = DataAgent()
-    data = data_agent.load_data("data/sales.csv")   # <-- your sales file goes here
-    
+    data = data_agent.load_data(DATA_PATH)
+
     if data is None:
-        print("Dataset not found. Please add sales.csv to /data folder.")
+        print(" Failed to load data.")
         return
 
     cleaned_data = data_agent.clean_data(data)
-    analysis = data_agent.basic_analysis(cleaned_data)
+    print("Basic Analysis:", data_agent.basic_analysis(cleaned_data))
 
-    print("\n🔹 Basic Data Analysis:")
-    print(analysis)
-
-    # --- AGENT 2: ML AGENT ---
+    print("\n===== STEP 2: ML AGENT =====")
     ml_agent = MLAgent()
-    
-    target_column = cleaned_data.columns[-1]  # last column assumed as prediction column
-    print(f"\n📌 Target Column Selected Automatically: {target_column}")
 
-    ml_results = ml_agent.train_model(cleaned_data, target_column)
+    # ⛔ CHANGE THIS TO ANY TARGET YOU WANT TO PREDICT
+    target_column = cleaned_data.columns[-1]
 
-    print("\n🔹 ML Results:")
-    print(f"Task: {ml_results['task']}")
-    print(f"Score: {ml_results['score']}")
+    model_info = ml_agent.train_model(cleaned_data, target_column)
 
-    # --- AGENT 3: VISUAL AGENT ---
+    print(f"ML Task: {model_info['task']}")
+    print(f"Model Score: {model_info['score']}")
+
+    print("\n===== STEP 3: VISUALIZATION AGENT =====")
     visual_agent = VisualAgent()
-    
-    # Simple visualization of the first numeric column
-    numeric_col = cleaned_data.select_dtypes(include=['int64','float64']).columns[0]
-    
-    print(f"\n📊 Generating Trend Chart for: {numeric_col}")
-    visual_agent.plot_column(cleaned_data, numeric_col)
 
-    print("\n📌 All graphs saved successfully!")
-    print("\n=== Multi-Agent System Finished ===")
+    # Plot all numeric columns trend
+    for col in cleaned_data.select_dtypes(include=['int64', 'float64']).columns:
+        visual_agent.plot_column(cleaned_data, col)
+
+    print("📊 Trend plots saved.")
+
+    print("\n🎉 Pipeline Completed Successfully!")
+
 
 if __name__ == "__main__":
     main()
+
